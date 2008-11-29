@@ -1,29 +1,28 @@
 %define gcj_support 1
 
-Name:           xmlgraphics-commons
-Version:        1.2
-Release:        %mkrel 0.1.1
-Epoch:          0
-Summary:        XML Graphics Commons
-
-Group:          Development/Java
-License:        Apache License
-URL:            http://xmlgraphics.apache.org/
-Source0:        xmlgraphics-commons-1.2-src.tar.gz
-
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root
-
+Summary:	XML Graphics Commons
+Name:		xmlgraphics-commons
+Version:	1.3.1
+Release:	%mkrel 0.0.1
+Epoch:		0
+Group:		Development/Java
+License:	Apache License
+URL:		http://xmlgraphics.apache.org/
+Source0:	http://apache.osuosl.org/xmlgraphics/commons/source/%{name}-%{version}-src.tar.gz
 %if %{gcj_support}
-BuildRequires:  java-gcj-compat-devel
+BuildRequires:	java-gcj-compat-devel
 %else
-BuildArch:      noarch
+BuildArch:	noarch
 %endif
-BuildRequires:  java-rpmbuild >= 0:1.6
-BuildRequires:  ant >= 0:1.6
-BuildRequires:  ant-junit >= 0:1.6
-BuildRequires:  junit
-BuildRequires:  jakarta-commons-io >= 0:1.1
-Requires:  jakarta-commons-io >= 0:1.1
+BuildRequires:	java-rpmbuild >= 0:1.6
+BuildRequires:	ant >= 0:1.6
+BuildRequires:	ant-junit >= 0:1.6
+BuildRequires:	junit
+BuildRequires:	jakarta-commons-io >= 0:1.1
+BuildRequires:	jakarta-commons-logging
+Requires:	jakarta-commons-io >= 0:1.1
+Requires:	jakarta-commons-logging
+BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
 %description
 Apache XML Graphics Commons is a library that consists of 
@@ -34,11 +33,11 @@ find components such as a PDF library, an RTF library,
 Graphics2D implementations that let you generate PDF & 
 PostScript files, and much more.
 
-%package        javadoc
-Summary:        Javadoc for %{name}
-Group:          Development/Java
+%package javadoc
+Summary:	Javadoc for %{name}
+Group:		Development/Java
 
-%description    javadoc
+%description javadoc
 %{summary}.
 
 %prep
@@ -46,27 +45,29 @@ Group:          Development/Java
 %{__rm} `find . -name "*.jar"`
 
 %build
+export JAVA_HOME=%{java_home}
+export ANT_HOME=/usr/share/ant
+export CLASSPATH=$CLASSPATH:/usr/share/java/commons-logging.jar
 export OPT_JAR_LIST="ant/ant-junit junit"
-export CLASSPATH=
 pushd lib
 ln -sf $(build-classpath commons-io) .
 popd
-%{ant} package javadocs
+%ant package javadocs
 
 %install
-rm -rf $RPM_BUILD_ROOT
-install -Dpm 0644 build/%{name}-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{name}-%{version}.jar
-ln -s %{name}-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{name}.jar
-install -d -m 755 $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
-cp -pr build/javadocs/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
-ln -s %{name}-%{version} $RPM_BUILD_ROOT%{_javadocdir}/%{name}
+rm -rf %{buildroot}
+install -Dpm 0644 build/%{name}-%{version}.jar %{buildroot}%{_javadir}/%{name}-%{version}.jar
+ln -s %{name}-%{version}.jar %{buildroot}%{_javadir}/%{name}.jar
+install -d -m 755 %{buildroot}%{_javadocdir}/%{name}-%{version}
+cp -pr build/javadocs/* %{buildroot}%{_javadocdir}/%{name}-%{version}
+ln -s %{name}-%{version} %{buildroot}%{_javadocdir}/%{name}
 
 %if %{gcj_support}
 %{_bindir}/aot-compile-rpm
 %endif
 
 %clean
-rm -rf $RPM_BUILD_ROOT
+rm -rf %{buildroot}
 
 %files
 %defattr(0644,root,root,0755)
@@ -81,5 +82,3 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(0644,root,root,0755)
 %doc %{_javadocdir}/%{name}-%{version}
 %doc %{_javadocdir}/%{name}
-
-
