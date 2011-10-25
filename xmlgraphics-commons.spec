@@ -1,28 +1,25 @@
-%define gcj_support 0
+Name:           xmlgraphics-commons
+Version:        1.4
+Release:        2
+Summary:        XML Graphics Commons
 
-Summary:	XML Graphics Commons
-Name:		xmlgraphics-commons
-Version:	1.4
-Release:	%mkrel 0.0.2
-Epoch:		0
-Group:		Development/Java
-License:	Apache License
-URL:		http://xmlgraphics.apache.org/
-Source0:	http://apache.osuosl.org/xmlgraphics/commons/source/%{name}-%{version}-src.tar.gz
-%if %{gcj_support}
-BuildRequires:	java-gcj-compat-devel
-%else
-BuildArch:	noarch
-%endif
-BuildRequires:	java-rpmbuild >= 0:1.6
-BuildRequires:	ant >= 0:1.6
-BuildRequires:	ant-junit >= 0:1.6
-BuildRequires:	junit
-BuildRequires:	jakarta-commons-io >= 0:1.1
-BuildRequires:	jakarta-commons-logging
-Requires:	jakarta-commons-io >= 0:1.1
-Requires:	jakarta-commons-logging
-BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
+Group:          Development/Java
+License:        ASL 2.0
+URL:            http://xmlgraphics.apache.org/
+Source0:        http://apache.skknet.net/xmlgraphics/commons/source/%{name}-%{version}-src.tar.gz
+
+BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+
+BuildArch:      noarch
+BuildRequires:  java-devel >= 0:1.6.0
+BuildRequires:  jpackage-utils >= 0:1.6
+BuildRequires:  ant >= 0:1.6
+BuildRequires:  ant-junit >= 0:1.6
+BuildRequires:  junit
+BuildRequires:  apache-commons-io >= 0:1.1
+BuildRequires:  apache-commons-logging >= 0:1.0.4
+Requires:	    apache-commons-logging >= 0:1.0.4
+Requires:       apache-commons-io >= 0:1.1
 
 %description
 Apache XML Graphics Commons is a library that consists of 
@@ -33,52 +30,47 @@ find components such as a PDF library, an RTF library,
 Graphics2D implementations that let you generate PDF & 
 PostScript files, and much more.
 
-%package javadoc
-Summary:	Javadoc for %{name}
-Group:		Development/Java
+%package        javadoc
+Summary:        Javadoc for %{name}
+Group:          Development/Java
+Requires:       jpackage-utils
 
-%description javadoc
+%description    javadoc
 %{summary}.
 
+
 %prep
-%setup -q
-%{__rm} `find . -name "*.jar"`
+%setup -q %{name}-%{version}
+rm -f `find . -name "*.jar"`
+
 
 %build
-export JAVA_HOME=%{java_home}
-export ANT_HOME=/usr/share/ant
-export CLASSPATH=$CLASSPATH:/usr/share/java/commons-logging.jar
+export CLASSPATH=$(build-classpath commons-logging)
 export OPT_JAR_LIST="ant/ant-junit junit"
 pushd lib
 ln -sf $(build-classpath commons-io) .
 popd
-%ant package javadocs
+ant package javadocs
 
 %install
-rm -rf %{buildroot}
-install -Dpm 0644 build/%{name}-%{version}.jar %{buildroot}%{_javadir}/%{name}-%{version}.jar
-ln -s %{name}-%{version}.jar %{buildroot}%{_javadir}/%{name}.jar
-install -d -m 755 %{buildroot}%{_javadocdir}/%{name}-%{version}
-cp -pr build/javadocs/* %{buildroot}%{_javadocdir}/%{name}-%{version}
-ln -s %{name}-%{version} %{buildroot}%{_javadocdir}/%{name}
-
-%if %{gcj_support}
-%{_bindir}/aot-compile-rpm
-%endif
+rm -rf $RPM_BUILD_ROOT
+install -Dpm 0644 build/%{name}-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{name}-%{version}.jar
+ln -s %{name}-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{name}.jar
+install -d -m 755 $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
+cp -pr build/javadocs/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
+ln -s %{name}-%{version} $RPM_BUILD_ROOT%{_javadocdir}/%{name}
 
 %clean
-rm -rf %{buildroot}
+rm -rf $RPM_BUILD_ROOT
 
 %files
-%defattr(0644,root,root,0755)
+%defattr(-,root,root,-)
 %doc LICENSE NOTICE README
 %{_javadir}/*.jar
-%if %{gcj_support}
-%dir %{_libdir}/gcj/%{name}
-%attr(-,root,root) %{_libdir}/gcj/%{name}/*
-%endif
 
 %files javadoc
-%defattr(0644,root,root,0755)
+%defattr(-,root,root,-)
 %doc %{_javadocdir}/%{name}-%{version}
 %doc %{_javadocdir}/%{name}
+
+
