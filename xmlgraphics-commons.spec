@@ -1,6 +1,6 @@
 Name:           xmlgraphics-commons
 Version:        1.4
-Release:        2
+Release:        4
 Summary:        XML Graphics Commons
 
 Group:          Development/Java
