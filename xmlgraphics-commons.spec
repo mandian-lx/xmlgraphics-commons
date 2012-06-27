@@ -1,14 +1,13 @@
 Name:           xmlgraphics-commons
 Version:        1.4
-Release:        4
+Release:        5
 Summary:        XML Graphics Commons
 
 Group:          Development/Java
 License:        ASL 2.0
 URL:            http://xmlgraphics.apache.org/
 Source0:        http://apache.skknet.net/xmlgraphics/commons/source/%{name}-%{version}-src.tar.gz
-
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+Patch0:         %{name}-java-7-fix.patch
 
 BuildArch:      noarch
 BuildRequires:  java-devel >= 0:1.6.0
@@ -18,8 +17,10 @@ BuildRequires:  ant-junit >= 0:1.6
 BuildRequires:  junit
 BuildRequires:  apache-commons-io >= 0:1.1
 BuildRequires:  apache-commons-logging >= 0:1.0.4
-Requires:	    apache-commons-logging >= 0:1.0.4
+Requires:	apache-commons-logging >= 0:1.0.4
 Requires:       apache-commons-io >= 0:1.1
+Requires(post):   jpackage-utils
+Requires(postun): jpackage-utils
 
 %description
 Apache XML Graphics Commons is a library that consists of 
@@ -42,7 +43,11 @@ Requires:       jpackage-utils
 %prep
 %setup -q %{name}-%{version}
 rm -f `find . -name "*.jar"`
+%patch0 -p0 
 
+# create pom from template
+sed "s:@version@:%{version}:g" %{name}-pom-template.pom \
+    > %{name}.pom
 
 %build
 export CLASSPATH=$(build-classpath commons-logging)
@@ -53,24 +58,27 @@ popd
 ant package javadocs
 
 %install
-rm -rf $RPM_BUILD_ROOT
-install -Dpm 0644 build/%{name}-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{name}-%{version}.jar
-ln -s %{name}-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{name}.jar
-install -d -m 755 $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
-cp -pr build/javadocs/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
-ln -s %{name}-%{version} $RPM_BUILD_ROOT%{_javadocdir}/%{name}
+install -d -m 755 %{buildroot}%{_mavenpomdir}
+install -Dpm 0644 build/%{name}-%{version}.jar %{buildroot}%{_javadir}/%{name}.jar
+install -pm 644 %{name}.pom %{buildroot}/%{_mavenpomdir}/JPP-%{name}.pom
+%add_to_maven_depmap org.apache.xmlgraphics %{name} %{version} JPP %{name}
 
-%clean
-rm -rf $RPM_BUILD_ROOT
+install -d -m 755 %{buildroot}%{_javadocdir}/%{name}
+cp -pr build/javadocs/* %{buildroot}%{_javadocdir}/%{name}
+
+%post
+%update_maven_depmap
+
+%postun
+%update_maven_depmap
 
 %files
-%defattr(-,root,root,-)
+%{_mavendepmapfragdir}/%{name}
+%{_mavenpomdir}/JPP-%{name}.pom
 %doc LICENSE NOTICE README
 %{_javadir}/*.jar
 
 %files javadoc
-%defattr(-,root,root,-)
-%doc %{_javadocdir}/%{name}-%{version}
 %doc %{_javadocdir}/%{name}
 
 
