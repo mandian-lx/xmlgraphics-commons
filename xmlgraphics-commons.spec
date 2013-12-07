@@ -3,7 +3,7 @@
 Summary:	XML Graphics Commons
 Name:		xmlgraphics-commons
 Version:	1.4
-Release:	0.0.6
+Release:	0.0.7
 Epoch:		0
 Group:		Development/Java
 License:	Apache License
