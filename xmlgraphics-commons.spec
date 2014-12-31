@@ -1,10 +1,10 @@
 %{?_javapackages_macros:%_javapackages_macros}
 Name:           xmlgraphics-commons
 Version:        1.5
-Release:        2.1%{?dist}
+Release:        4.1
 Epoch:          0
 Summary:        XML Graphics Commons
-
+Group:		Development/Java
 
 License:        ASL 2.0
 URL:            http://xmlgraphics.apache.org/
@@ -62,16 +62,13 @@ ant package javadocs
 install -d -m 755 $RPM_BUILD_ROOT%{_mavenpomdir}
 install -Dpm 0644 build/%{name}-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{name}.jar
 install -pm 644 %{name}.pom $RPM_BUILD_ROOT/%{_mavenpomdir}/JPP-%{name}.pom
-%add_maven_depmap JPP-%{name}.pom %{name}.jar
+%add_maven_depmap
 
 install -d -m 755 $RPM_BUILD_ROOT%{_javadocdir}/%{name}
 cp -pr build/javadocs/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}
 
-%files
+%files -f .mfiles
 %doc LICENSE NOTICE README
-%{_mavendepmapfragdir}/%{name}
-%{_mavenpomdir}/JPP-%{name}.pom
-%{_javadir}/*.jar
 
 %files javadoc
 %doc LICENSE NOTICE
