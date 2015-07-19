@@ -1,7 +1,7 @@
 %{?_javapackages_macros:%_javapackages_macros}
 Name:           xmlgraphics-commons
 Version:        1.5
-Release:        4.1
+Release:        4.2
 Epoch:          0
 Summary:        XML Graphics Commons
 Group:		Development/Java
